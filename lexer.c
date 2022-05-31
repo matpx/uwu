@@ -306,11 +306,6 @@ Token lexer_next(Lexer *lexer)
                         lexer->p++;
                         next.id = TOK_ASSIGN_BIT_SHIFT_RIGHT;
                     }
-                    else if (*(lexer->p + 1) == '=')
-                    {
-                        lexer->p++;
-                        next.id = TOK_COMP_LARGER_EQ;
-                    }
                     else
                     {
                         next.id = TOK_BIT_SHIFT_RIGHT;
