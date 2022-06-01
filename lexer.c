@@ -136,47 +136,47 @@ static inline Token lexer_lex_number(Lexer *lexer)
     }                                   \
     break;
 
-#define IF_LOGIC_OR_BIT(SYMBOLIF, LOGIC_TOK, ASSIGN_BIT_TOK, BIT_TOK) \
-    if (*(lexer->p + 1) == SYMBOLIF)                                  \
-    {                                                                 \
-        lexer->p++;                                                   \
-        next.id = LOGIC_TOK;                                          \
-    }                                                                 \
-    else if (*(lexer->p + 1) == '=')                                  \
-    {                                                                 \
-        lexer->p++;                                                   \
-        next.id = ASSIGN_BIT_TOK;                                     \
-    }                                                                 \
-    else                                                              \
-    {                                                                 \
-        next.id = BIT_TOK;                                            \
-    }                                                                 \
+#define IF_LOGIC_OR_BIT(SECOND_SYMBOL, LOGIC_TOK, ASSIGN_BIT_TOK, BIT_TOK) \
+    if (*(lexer->p + 1) == SECOND_SYMBOL)                                  \
+    {                                                                      \
+        lexer->p++;                                                        \
+        next.id = LOGIC_TOK;                                               \
+    }                                                                      \
+    else if (*(lexer->p + 1) == '=')                                       \
+    {                                                                      \
+        lexer->p++;                                                        \
+        next.id = ASSIGN_BIT_TOK;                                          \
+    }                                                                      \
+    else                                                                   \
+    {                                                                      \
+        next.id = BIT_TOK;                                                 \
+    }                                                                      \
     break;
 
-#define IF_BIT_OR_COMP(SYMBOLIF, ASSIGN_BIT_TOK, BIT_TOK, COMP_EQ_TOK, COMP_TOK) \
-    if (*(lexer->p + 1) == SYMBOLIF)                                             \
-    {                                                                            \
-        lexer->p++;                                                              \
-                                                                                 \
-        if (*(lexer->p + 1) == '=')                                              \
-        {                                                                        \
-            lexer->p++;                                                          \
-            next.id = ASSIGN_BIT_TOK;                                            \
-        }                                                                        \
-        else                                                                     \
-        {                                                                        \
-            next.id = BIT_TOK;                                                   \
-        }                                                                        \
-    }                                                                            \
-    else if (*(lexer->p + 1) == '=')                                             \
-    {                                                                            \
-        lexer->p++;                                                              \
-        next.id = COMP_EQ_TOK;                                                   \
-    }                                                                            \
-    else                                                                         \
-    {                                                                            \
-        next.id = COMP_TOK;                                                      \
-    }                                                                            \
+#define IF_BIT_OR_COMP(SECOND_SYMBOL, ASSIGN_BIT_TOK, BIT_TOK, COMP_EQ_TOK, COMP_TOK) \
+    if (*(lexer->p + 1) == SECOND_SYMBOL)                                             \
+    {                                                                                 \
+        lexer->p++;                                                                   \
+                                                                                      \
+        if (*(lexer->p + 1) == '=')                                                   \
+        {                                                                             \
+            lexer->p++;                                                               \
+            next.id = ASSIGN_BIT_TOK;                                                 \
+        }                                                                             \
+        else                                                                          \
+        {                                                                             \
+            next.id = BIT_TOK;                                                        \
+        }                                                                             \
+    }                                                                                 \
+    else if (*(lexer->p + 1) == '=')                                                  \
+    {                                                                                 \
+        lexer->p++;                                                                   \
+        next.id = COMP_EQ_TOK;                                                        \
+    }                                                                                 \
+    else                                                                              \
+    {                                                                                 \
+        next.id = COMP_TOK;                                                           \
+    }                                                                                 \
     break;
 
 static inline Token lexer_lex_symbol(Lexer *lexer)
