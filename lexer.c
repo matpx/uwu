@@ -244,14 +244,14 @@ Token lexer_next(Lexer *lexer)
 {
     for (;;)
     {
-        while (*lexer->p == '\0')
+        if (*lexer->p == '\0')
         {
+            fetch_next_line(lexer);
+
             if (feof(lexer->input_file))
             {
                 return (Token){0};
             }
-
-            fetch_next_line(lexer);
         }
 
         if (is_alpha(*lexer->p))
