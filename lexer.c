@@ -72,6 +72,265 @@ static TokenId get_keyword(const char *text, size_t l)
     return TOK_EOF;
 }
 
+static inline Token lexer_lex_word(Lexer *lexer)
+{
+    Token next = {0};
+
+    const char *start = lexer->p;
+
+    do
+    {
+        ++lexer->p;
+    } while (is_alpha(*lexer->p));
+
+    const size_t l = lexer->p - start;
+
+    const TokenId keyword = get_keyword(start, l);
+    if (keyword == TOK_EOF)
+    {
+        next.id = TOK_STRING;
+        next.text = malloc(l + 1);
+        next.text[l] = '\0';
+
+        memcpy(next.text, start, l);
+    }
+    else
+    {
+        next.id = keyword;
+    }
+
+    return next;
+}
+
+static inline Token lexer_lex_number(Lexer *lexer)
+{
+    Token next = {0};
+
+    const char *start = lexer->p;
+
+    do
+    {
+        ++lexer->p;
+    } while (is_digit(*lexer->p));
+
+    const size_t l = lexer->p - start;
+
+    next.id = TOK_INT;
+    next.text = malloc(l + 1);
+    next.text[l] = '\0';
+
+    memcpy(next.text, start, l);
+
+    return next;
+}
+
+static inline Token lexer_lex_symbol(Lexer *lexer)
+{
+    Token next = {0};
+
+    switch (*lexer->p)
+    {
+    case '(':
+        next.id = TOK_BRACKET_CURVY_OPEN;
+        break;
+    case ')':
+        next.id = TOK_BRACKET_CURVY_CLOSE;
+        break;
+    case '{':
+        next.id = TOK_BRACKET_CURLY_OPEN;
+        break;
+    case '}':
+        next.id = TOK_BRACKET_CURLY_CLOSE;
+        break;
+    case '[':
+        next.id = TOK_BRACKET_BOX_OPEN;
+        break;
+    case ']':
+        next.id = TOK_BRACKET_BOX_CLOSE;
+        break;
+    case '+':
+        if (*(lexer->p + 1) == '=')
+        {
+            lexer->p++;
+            next.id = TOK_ASSIGN_ARITH_PLUS;
+        }
+        else
+        {
+            next.id = TOK_ARITH_PLUS;
+        }
+        break;
+    case '-':
+        if (*(lexer->p + 1) == '=')
+        {
+            lexer->p++;
+            next.id = TOK_ASSIGN_ARITH_MINUS;
+        }
+        else
+        {
+            next.id = TOK_ARITH_MINUS;
+        }
+        break;
+    case '*':
+        if (*(lexer->p + 1) == '=')
+        {
+            lexer->p++;
+            next.id = TOK_ASSIGN_ARITH_MULTIPLY;
+        }
+        else
+        {
+            next.id = TOK_ARITH_MULTIPLY;
+        }
+        break;
+    case '/':
+        if (*(lexer->p + 1) == '=')
+        {
+            lexer->p++;
+            next.id = TOK_ASSIGN_ARITH_DIVIDE;
+        }
+        else
+        {
+            next.id = TOK_ARITH_DIVIDE;
+        }
+        break;
+    case '%':
+        if (*(lexer->p + 1) == '=')
+        {
+            lexer->p++;
+            next.id = TOK_ASSIGN_ARITH_MODULO;
+        }
+        else
+        {
+            next.id = TOK_ARITH_MODULO;
+        }
+        break;
+    case '=':
+        if (*(lexer->p + 1) == '=')
+        {
+            lexer->p++;
+            next.id = TOK_COMP_EQUAL;
+        }
+        else
+        {
+            next.id = TOK_ASSIGN;
+        }
+        break;
+    case '&':
+        if (*(lexer->p + 1) == '&')
+        {
+            lexer->p++;
+            next.id = TOK_LOGIC_AND;
+        }
+        else if (*(lexer->p + 1) == '=')
+        {
+            lexer->p++;
+            next.id = TOK_ASSIGN_BIT_AND;
+        }
+        else
+        {
+            next.id = TOK_BIT_AND;
+        }
+        break;
+    case '|':
+        if (*(lexer->p + 1) == '|')
+        {
+            lexer->p++;
+            next.id = TOK_LOGIC_OR;
+        }
+        else if (*(lexer->p + 1) == '=')
+        {
+            lexer->p++;
+            next.id = TOK_ASSIGN_BIT_OR;
+        }
+        else
+        {
+            next.id = TOK_BIT_OR;
+        }
+        break;
+    case '^':
+        if (*(lexer->p + 1) == '=')
+        {
+            lexer->p++;
+            next.id = TOK_ASSIGN_BIT_XOR;
+        }
+        else
+        {
+            next.id = TOK_BIT_XOR;
+        }
+        break;
+    case '~':
+        next.id = TOK_BIT_NEGATE;
+        break;
+    case '<':
+        if (*(lexer->p + 1) == '<')
+        {
+            lexer->p++;
+
+            if (*(lexer->p + 1) == '=')
+            {
+                lexer->p++;
+                next.id = TOK_ASSIGN_BIT_SHIFT_LEFT;
+            }
+            else
+            {
+                next.id = TOK_BIT_SHIFT_LEFT;
+            }
+        }
+        else if (*(lexer->p + 1) == '=')
+        {
+            lexer->p++;
+            next.id = TOK_COMP_SMALLER_EQ;
+        }
+        else
+        {
+            next.id = TOK_COMP_SMALLER;
+        }
+        break;
+    case '>':
+        if (*(lexer->p + 1) == '>')
+        {
+            lexer->p++;
+
+            if (*(lexer->p + 1) == '=')
+            {
+                lexer->p++;
+                next.id = TOK_ASSIGN_BIT_SHIFT_RIGHT;
+            }
+            else
+            {
+                next.id = TOK_BIT_SHIFT_RIGHT;
+            }
+        }
+        else if (*(lexer->p + 1) == '=')
+        {
+            lexer->p++;
+            next.id = TOK_COMP_LARGER_EQ;
+        }
+        else
+        {
+            next.id = TOK_COMP_LARGER;
+        }
+        break;
+    case '!':
+        if (*(lexer->p + 1) == '=')
+        {
+            lexer->p++;
+            next.id = TOK_COMP_UNEQUAL;
+        }
+        else
+        {
+            next.id = TOK_LOGIC_NOT;
+        }
+        break;
+    default:
+        lexer_fatal("Unknown symbol");
+        break;
+    }
+
+    lexer->p++;
+
+    return next;
+}
+
 Token lexer_next(Lexer *lexer)
 {
     for (;;)
@@ -85,261 +344,22 @@ Token lexer_next(Lexer *lexer)
 
             fetch_next_line(lexer);
         }
-        Token next = {0};
 
-        if (is_alpha(*lexer->p)) // lex identifier and reserved keywords
+        if (is_alpha(*lexer->p))
         {
-            const char *start = lexer->p;
-
-            do
-            {
-                ++lexer->p;
-            } while (is_alpha(*lexer->p));
-
-            const size_t l = lexer->p - start;
-
-            const TokenId keyword = get_keyword(start, l);
-            if (keyword == TOK_EOF)
-            {
-                next.id = TOK_STRING;
-                next.text = malloc(l + 1);
-                next.text[l] = '\0';
-
-                memcpy(next.text, start, l);
-            }
-            else
-            {
-                next.id = keyword;
-            }
-
-            return next;
+            return lexer_lex_word(lexer);
         }
-        else if (is_digit(*lexer->p)) // lex integers
+        else if (is_digit(*lexer->p))
         {
-            const char *start = lexer->p;
-
-            do
-            {
-                ++lexer->p;
-            } while (is_digit(*lexer->p));
-
-            const size_t l = lexer->p - start;
-
-            next.id = TOK_INT;
-            next.text = malloc(l + 1);
-            next.text[l] = '\0';
-
-            memcpy(next.text, start, l);
-
-            return next;
+            return lexer_lex_number(lexer);
         }
-        else if (is_whitespace(*lexer->p)) // lex whitespace and line breaks
+        else if (is_whitespace(*lexer->p))
         {
             lexer->p++;
         }
-        else // lex short token
+        else
         {
-            switch (*lexer->p)
-            {
-            case '(':
-                next.id = TOK_BRACKET_CURVY_OPEN;
-                break;
-            case ')':
-                next.id = TOK_BRACKET_CURVY_CLOSE;
-                break;
-            case '{':
-                next.id = TOK_BRACKET_CURLY_OPEN;
-                break;
-            case '}':
-                next.id = TOK_BRACKET_CURLY_CLOSE;
-                break;
-            case '[':
-                next.id = TOK_BRACKET_BOX_OPEN;
-                break;
-            case ']':
-                next.id = TOK_BRACKET_BOX_CLOSE;
-                break;
-            case '+':
-                if (*(lexer->p + 1) == '=')
-                {
-                    lexer->p++;
-                    next.id = TOK_ASSIGN_ARITH_PLUS;
-                }
-                else
-                {
-                    next.id = TOK_ARITH_PLUS;
-                }
-                break;
-            case '-':
-                if (*(lexer->p + 1) == '=')
-                {
-                    lexer->p++;
-                    next.id = TOK_ASSIGN_ARITH_MINUS;
-                }
-                else
-                {
-                    next.id = TOK_ARITH_MINUS;
-                }
-                break;
-            case '*':
-                if (*(lexer->p + 1) == '=')
-                {
-                    lexer->p++;
-                    next.id = TOK_ASSIGN_ARITH_MULTIPLY;
-                }
-                else
-                {
-                    next.id = TOK_ARITH_MULTIPLY;
-                }
-                break;
-            case '/':
-                if (*(lexer->p + 1) == '=')
-                {
-                    lexer->p++;
-                    next.id = TOK_ASSIGN_ARITH_DIVIDE;
-                }
-                else
-                {
-                    next.id = TOK_ARITH_DIVIDE;
-                }
-                break;
-            case '%':
-                if (*(lexer->p + 1) == '=')
-                {
-                    lexer->p++;
-                    next.id = TOK_ASSIGN_ARITH_MODULO;
-                }
-                else
-                {
-                    next.id = TOK_ARITH_MODULO;
-                }
-                break;
-            case '=':
-                if (*(lexer->p + 1) == '=')
-                {
-                    lexer->p++;
-                    next.id = TOK_COMP_EQUAL;
-                }
-                else
-                {
-                    next.id = TOK_ASSIGN;
-                }
-                break;
-            case '&':
-                if (*(lexer->p + 1) == '&')
-                {
-                    lexer->p++;
-                    next.id = TOK_LOGIC_AND;
-                }
-                else if (*(lexer->p + 1) == '=')
-                {
-                    lexer->p++;
-                    next.id = TOK_ASSIGN_BIT_AND;
-                }
-                else
-                {
-                    next.id = TOK_BIT_AND;
-                }
-                break;
-            case '|':
-                if (*(lexer->p + 1) == '|')
-                {
-                    lexer->p++;
-                    next.id = TOK_LOGIC_OR;
-                }
-                else if (*(lexer->p + 1) == '=')
-                {
-                    lexer->p++;
-                    next.id = TOK_ASSIGN_BIT_OR;
-                }
-                else
-                {
-                    next.id = TOK_BIT_OR;
-                }
-                break;
-            case '^':
-                if (*(lexer->p + 1) == '=')
-                {
-                    lexer->p++;
-                    next.id = TOK_ASSIGN_BIT_XOR;
-                }
-                else
-                {
-                    next.id = TOK_BIT_XOR;
-                }
-                break;
-            case '~':
-                next.id = TOK_BIT_NEGATE;
-                break;
-            case '<':
-                if (*(lexer->p + 1) == '<')
-                {
-                    lexer->p++;
-
-                    if (*(lexer->p + 1) == '=')
-                    {
-                        lexer->p++;
-                        next.id = TOK_ASSIGN_BIT_SHIFT_LEFT;
-                    }
-                    else
-                    {
-                        next.id = TOK_BIT_SHIFT_LEFT;
-                    }
-                }
-                else if (*(lexer->p + 1) == '=')
-                {
-                    lexer->p++;
-                    next.id = TOK_COMP_SMALLER_EQ;
-                }
-                else
-                {
-                    next.id = TOK_COMP_SMALLER;
-                }
-                break;
-            case '>':
-                if (*(lexer->p + 1) == '>')
-                {
-                    lexer->p++;
-
-                    if (*(lexer->p + 1) == '=')
-                    {
-                        lexer->p++;
-                        next.id = TOK_ASSIGN_BIT_SHIFT_RIGHT;
-                    }
-                    else
-                    {
-                        next.id = TOK_BIT_SHIFT_RIGHT;
-                    }
-                }
-                else if (*(lexer->p + 1) == '=')
-                {
-                    lexer->p++;
-                    next.id = TOK_COMP_LARGER_EQ;
-                }
-                else
-                {
-                    next.id = TOK_COMP_LARGER;
-                }
-                break;
-            case '!':
-                if (*(lexer->p + 1) == '=')
-                {
-                    lexer->p++;
-                    next.id = TOK_COMP_UNEQUAL;
-                }
-                else
-                {
-                    next.id = TOK_LOGIC_NOT;
-                }
-                break;
-            default:
-                lexer_fatal("Unknown symbol");
-                break;
-            }
-
-            lexer->p++;
-
-            return next;
+            return lexer_lex_symbol(lexer);
         }
     }
 }
