@@ -54,7 +54,7 @@ static void lexer_fatal(const char *error_msg)
 
 static void fetch_next_line(Lexer *lexer)
 {
-    if (fgets(lexer->next_line, 255, lexer->input_file) == NULL)
+    if (fgets(lexer->next_line, 255, lexer->input_file) == NULL) // TODO: increase size dynamically
     {
         lexer->next_line = "\0";
     }
@@ -124,66 +124,11 @@ static inline Token lexer_lex_number(Lexer *lexer)
     return next;
 }
 
-#define IF_ASSIGN(ASSIGN_TOK, ELSE_TOK) \
-    if (*(lexer->p + 1) == '=')         \
-    {                                   \
-        lexer->p++;                     \
-        next.id = ASSIGN_TOK;           \
-    }                                   \
-    else                                \
-    {                                   \
-        next.id = ELSE_TOK;             \
-    }                                   \
-    break;
-
-#define IF_LOGIC_OR_BIT(SECOND_SYMBOL, LOGIC_TOK, ASSIGN_BIT_TOK, BIT_TOK) \
-    if (*(lexer->p + 1) == SECOND_SYMBOL)                                  \
-    {                                                                      \
-        lexer->p++;                                                        \
-        next.id = LOGIC_TOK;                                               \
-    }                                                                      \
-    else if (*(lexer->p + 1) == '=')                                       \
-    {                                                                      \
-        lexer->p++;                                                        \
-        next.id = ASSIGN_BIT_TOK;                                          \
-    }                                                                      \
-    else                                                                   \
-    {                                                                      \
-        next.id = BIT_TOK;                                                 \
-    }                                                                      \
-    break;
-
-#define IF_BIT_OR_COMP(SECOND_SYMBOL, ASSIGN_BIT_TOK, BIT_TOK, COMP_EQ_TOK, COMP_TOK) \
-    if (*(lexer->p + 1) == SECOND_SYMBOL)                                             \
-    {                                                                                 \
-        lexer->p++;                                                                   \
-                                                                                      \
-        if (*(lexer->p + 1) == '=')                                                   \
-        {                                                                             \
-            lexer->p++;                                                               \
-            next.id = ASSIGN_BIT_TOK;                                                 \
-        }                                                                             \
-        else                                                                          \
-        {                                                                             \
-            next.id = BIT_TOK;                                                        \
-        }                                                                             \
-    }                                                                                 \
-    else if (*(lexer->p + 1) == '=')                                                  \
-    {                                                                                 \
-        lexer->p++;                                                                   \
-        next.id = COMP_EQ_TOK;                                                        \
-    }                                                                                 \
-    else                                                                              \
-    {                                                                                 \
-        next.id = COMP_TOK;                                                           \
-    }                                                                                 \
-    break;
-
 static inline Token lexer_lex_symbol(Lexer *lexer)
 {
     Token next = {0};
 
-    switch (*lexer->p)
+    switch (*(lexer->p++))
     {
     case '(':
         next.id = TOK_BRACKET_CURVY_OPEN;
@@ -204,32 +149,178 @@ static inline Token lexer_lex_symbol(Lexer *lexer)
         next.id = TOK_BRACKET_BOX_CLOSE;
         break;
     case '+':
-        IF_ASSIGN(TOK_ASSIGN_ARITH_PLUS, TOK_ARITH_PLUS);
+        if (*lexer->p == '=')
+        {
+            lexer->p++;
+            next.id = TOK_ASSIGN_ARITH_PLUS;
+        }
+        else
+        {
+            next.id = TOK_ARITH_PLUS;
+        }
+        break;
     case '-':
-        IF_ASSIGN(TOK_ASSIGN_ARITH_MINUS, TOK_ARITH_MINUS);
+        if (*lexer->p == '=')
+        {
+            lexer->p++;
+            next.id = TOK_ASSIGN_ARITH_MINUS;
+        }
+        else
+        {
+            next.id = TOK_ARITH_MINUS;
+        }
+        break;
     case '*':
-        IF_ASSIGN(TOK_ASSIGN_ARITH_MULTIPLY, TOK_ARITH_MULTIPLY);
+        if (*lexer->p == '=')
+        {
+            lexer->p++;
+            next.id = TOK_ASSIGN_ARITH_MULTIPLY;
+        }
+        else
+        {
+            next.id = TOK_ARITH_MULTIPLY;
+        }
+        break;
     case '/':
-        IF_ASSIGN(TOK_ASSIGN_ARITH_DIVIDE, TOK_ARITH_DIVIDE);
+        if (*lexer->p == '=')
+        {
+            lexer->p++;
+            next.id = TOK_ASSIGN_ARITH_DIVIDE;
+        }
+        else
+        {
+            next.id = TOK_ARITH_DIVIDE;
+        }
+        break;
     case '%':
-        IF_ASSIGN(TOK_ASSIGN_ARITH_MODULO, TOK_ARITH_MODULO);
+        if (*lexer->p == '=')
+        {
+            lexer->p++;
+            next.id = TOK_ASSIGN_ARITH_MODULO;
+        }
+        else
+        {
+            next.id = TOK_ARITH_MODULO;
+        }
+        break;
     case '=':
-        IF_ASSIGN(TOK_COMP_EQUAL, TOK_ASSIGN);
+        if (*lexer->p == '=')
+        {
+            lexer->p++;
+            next.id = TOK_COMP_EQUAL;
+        }
+        else
+        {
+            next.id = TOK_ASSIGN;
+        }
+        break;
     case '&':
-        IF_LOGIC_OR_BIT('&', TOK_LOGIC_AND, TOK_ASSIGN_BIT_AND, TOK_BIT_AND);
+        if (*lexer->p == '&')
+        {
+            lexer->p++;
+            next.id = TOK_LOGIC_AND;
+        }
+        else if (*lexer->p == '=')
+        {
+            lexer->p++;
+            next.id = TOK_ASSIGN_BIT_AND;
+        }
+        else
+        {
+            next.id = TOK_BIT_AND;
+        }
+        break;
     case '|':
-        IF_LOGIC_OR_BIT('|', TOK_LOGIC_OR, TOK_ASSIGN_BIT_OR, TOK_BIT_OR);
+        if (*lexer->p == '|')
+        {
+            lexer->p++;
+            next.id = TOK_LOGIC_OR;
+        }
+        else if (*lexer->p == '=')
+        {
+            lexer->p++;
+            next.id = TOK_ASSIGN_BIT_OR;
+        }
+        else
+        {
+            next.id = TOK_BIT_OR;
+        }
+        break;
     case '^':
-        IF_ASSIGN(TOK_ASSIGN_BIT_XOR, TOK_BIT_XOR);
+        if (*lexer->p == '=')
+        {
+            lexer->p++;
+            next.id = TOK_ASSIGN_BIT_XOR;
+        }
+        else
+        {
+            next.id = TOK_BIT_XOR;
+        }
+        break;
     case '~':
         next.id = TOK_BIT_NEGATE;
         break;
     case '<':
-        IF_BIT_OR_COMP('<', TOK_ASSIGN_BIT_SHIFT_LEFT, TOK_BIT_SHIFT_LEFT, TOK_COMP_SMALLER_EQ, TOK_COMP_SMALLER);
+        if (*lexer->p == '<')
+        {
+            lexer->p++;
+
+            if (*lexer->p == '=')
+            {
+                lexer->p++;
+                next.id = TOK_ASSIGN_BIT_SHIFT_LEFT;
+            }
+            else
+            {
+                next.id = TOK_BIT_SHIFT_LEFT;
+            }
+        }
+        else if (*lexer->p == '=')
+        {
+            lexer->p++;
+            next.id = TOK_COMP_SMALLER_EQ;
+        }
+        else
+        {
+            next.id = TOK_COMP_SMALLER;
+        }
+        break;
     case '>':
-        IF_BIT_OR_COMP('>', TOK_ASSIGN_BIT_SHIFT_RIGHT, TOK_BIT_SHIFT_RIGHT, TOK_COMP_LARGER_EQ, TOK_COMP_LARGER);
+        if (*lexer->p == '>')
+        {
+            lexer->p++;
+
+            if (*lexer->p == '=')
+            {
+                lexer->p++;
+                next.id = TOK_ASSIGN_BIT_SHIFT_RIGHT;
+            }
+            else
+            {
+                next.id = TOK_BIT_SHIFT_RIGHT;
+            }
+        }
+        else if (*lexer->p == '=')
+        {
+            lexer->p++;
+            next.id = TOK_COMP_LARGER_EQ;
+        }
+        else
+        {
+            next.id = TOK_COMP_LARGER;
+        }
+        break;
     case '!':
-        IF_ASSIGN(TOK_COMP_UNEQUAL, TOK_LOGIC_NOT);
+        if (*lexer->p == '=')
+        {
+            lexer->p++;
+            next.id = TOK_COMP_UNEQUAL;
+        }
+        else
+        {
+            next.id = TOK_LOGIC_NOT;
+        }
+        break;
     default:
         lexer_fatal("Unknown symbol");
         break;

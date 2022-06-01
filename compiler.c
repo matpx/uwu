@@ -2,7 +2,7 @@
 
 int main(int argc, char *argv[])
 {
-    FILE *input_file = fopen("source.uwu", "r");
+    FILE *input_file = fopen("lex-test.uwu", "r");
 
     if (input_file == NULL)
     {
