@@ -2,6 +2,12 @@
 #include <stdbool.h>
 #include <string.h>
 
+/*
+ *  ======================
+ *  lexer helper functions
+ *  ======================
+ */
+
 static inline bool is_alpha(const char c)
 {
     if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c & 0b10000000))
@@ -32,18 +38,21 @@ static inline bool is_whitespace(const char c)
     return false;
 }
 
-Lexer lexer_create(FILE *input_file)
+static inline TokenId find_keyword(const char *text, const size_t l)
 {
-    char *line_mem = malloc(255);
+    if (strncmp(text, "fn", l) == 0)
+    {
+        return TOK_FN;
+    }
 
-    Lexer lexer = {
-        .input_file = input_file,
-        .next_line = line_mem,
-        .p = "\0",
-    };
-
-    return lexer;
+    return TOK_EOF;
 }
+
+/*
+ *  ======================
+ *  static lexer functions
+ *  ======================
+ */
 
 static void lexer_fatal(const char *error_msg)
 {
@@ -52,7 +61,10 @@ static void lexer_fatal(const char *error_msg)
     exit(-1);
 }
 
-static void fetch_next_line(Lexer *lexer)
+/**
+ * @brief Load next line from input file into next_line buffer.
+ */
+static void lexer_fetch_line(Lexer *lexer)
 {
     if (fgets(lexer->next_line, 255, lexer->input_file) == NULL) // TODO: increase size dynamically
     {
@@ -62,16 +74,9 @@ static void fetch_next_line(Lexer *lexer)
     lexer->p = lexer->next_line;
 }
 
-static TokenId get_keyword(const char *text, size_t l)
-{
-    if (strncmp(text, "fn", l) == 0) // TODO: hashmap
-    {
-        return TOK_FN;
-    }
-
-    return TOK_EOF;
-}
-
+/**
+ * @brief Lexes a name or identifier
+ */
 static inline Token lexer_lex_word(Lexer *lexer)
 {
     Token next = {0};
@@ -85,7 +90,7 @@ static inline Token lexer_lex_word(Lexer *lexer)
 
     const size_t l = lexer->p - start;
 
-    const TokenId keyword = get_keyword(start, l);
+    const TokenId keyword = find_keyword(start, l);
     if (keyword == TOK_EOF)
     {
         next.id = TOK_STRING;
@@ -102,6 +107,9 @@ static inline Token lexer_lex_word(Lexer *lexer)
     return next;
 }
 
+/**
+ * @brief Lexes an integer
+ */
 static inline Token lexer_lex_number(Lexer *lexer)
 {
     Token next = {0};
@@ -124,6 +132,9 @@ static inline Token lexer_lex_number(Lexer *lexer)
     return next;
 }
 
+/**
+ * @brief Lexes a bracket and operator
+ */
 static inline Token lexer_lex_symbol(Lexer *lexer)
 {
     Token next = {0};
@@ -331,13 +342,32 @@ static inline Token lexer_lex_symbol(Lexer *lexer)
     return next;
 }
 
+/*
+ *  ======================
+ *  public lexer functions
+ *  ======================
+ */
+
+Lexer lexer_create(FILE *input_file)
+{
+    char *line_mem = malloc(255);
+
+    Lexer lexer = {
+        .input_file = input_file,
+        .next_line = line_mem,
+        .p = "\0",
+    };
+
+    return lexer;
+}
+
 Token lexer_next(Lexer *lexer)
 {
     for (;;)
     {
         if (*lexer->p == '\0')
         {
-            fetch_next_line(lexer);
+            lexer_fetch_line(lexer);
 
             if (feof(lexer->input_file))
             {
