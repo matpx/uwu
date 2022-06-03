@@ -93,7 +93,7 @@ static inline Token lexer_lex_word(Lexer *lexer)
     const TokenId keyword = find_keyword(start, l);
     if (keyword == TOK_EOF)
     {
-        next.id = TOK_STRING;
+        next.id = TOK_NAME;
         next.text = malloc(l + 1);
         next.text[l] = '\0';
 

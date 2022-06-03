@@ -7,6 +7,7 @@ typedef enum
 
     TOK_FN, // 'fn' - function definition
 
+    TOK_NAME,   // name
     TOK_STRING, // string
     TOK_INT,    // integer
     TOK_FLOAT,  // float
@@ -24,7 +25,7 @@ typedef enum
     TOK_ARITH_DIVIDE,   // /
     TOK_ARITH_MODULO,   // %
 
-    TOK_ASSIGN,                // =
+    TOK_ASSIGN, // =
 
     TOK_ASSIGN_ARITH_PLUS,     // +=
     TOK_ASSIGN_ARITH_MINUS,    // -=

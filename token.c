@@ -8,6 +8,8 @@ const char *token_name(const TokenId id)
         return "Invalid: End of File";
     case TOK_FN:
         return "fn";
+    case TOK_NAME:
+        return "name";
     case TOK_STRING:
         return "string";
     case TOK_INT:
