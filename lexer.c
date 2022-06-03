@@ -3,11 +3,14 @@
 #include <string.h>
 
 /*
- *  ======================
+ *  ------------------------------------
  *  lexer helper functions
- *  ======================
+ *  ------------------------------------
  */
 
+/**
+ * @brief matches a-z, A-Z and any unicode character
+ */
 static inline bool is_alpha(const char c)
 {
     if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c & 0b10000000))
@@ -18,6 +21,9 @@ static inline bool is_alpha(const char c)
     return false;
 }
 
+/**
+ * @brief matches 0-9
+ */
 static inline bool is_digit(const char c)
 {
     if (c >= '0' && c <= '9')
@@ -28,6 +34,9 @@ static inline bool is_digit(const char c)
     return false;
 }
 
+/**
+ * @brief matches ascii whitespace, CR/LF and tab
+ */
 static inline bool is_whitespace(const char c)
 {
     if (c == ' ' || c == '\n' || c == '\r' || c == '\t')
@@ -38,6 +47,10 @@ static inline bool is_whitespace(const char c)
     return false;
 }
 
+/**
+ * @brief Compares text with reserved keywords and returns
+ *        related @ref TokenId if a keyword has been matched
+ */
 static inline TokenId find_keyword(const char *text, const size_t l)
 {
     if (strncmp(text, "fn", l) == 0)
@@ -49,11 +62,14 @@ static inline TokenId find_keyword(const char *text, const size_t l)
 }
 
 /*
- *  ======================
+ *  ------------------------------------
  *  static lexer functions
- *  ======================
+ *  ------------------------------------
  */
 
+/**
+ * @brief Print error message and exit application
+ */
 static void lexer_fatal(const char *error_msg)
 {
     fprintf(stderr, "Lexer Fatal: %s", error_msg);
@@ -343,9 +359,9 @@ static inline Token lexer_lex_symbol(Lexer *lexer)
 }
 
 /*
- *  ======================
+ *  ------------------------------------
  *  public lexer functions
- *  ======================
+ *  ------------------------------------
  */
 
 Lexer lexer_create(FILE *input_file)

@@ -14,17 +14,11 @@ typedef struct
 
 /**
  * @brief Init lexer and allocate line buffer
- *
- * @param input_file Open input file
- * @return Lexer
  */
-Lexer lexer_create();
+Lexer lexer_create(FILE *input_file);
 
 /**
  * @brief Fetch next @ref Token from lexer input
- *
- * @param lexer
- * @return Token Next @ref Token from input
  */
 Token lexer_next(Lexer *lexer);
 
