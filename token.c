@@ -1,11 +1,12 @@
 #include "token.h"
+#include <stdlib.h>
 
 const char *token_name(const TokenId id)
 {
     switch (id)
     {
     case TOK_EOF:
-        return "Invalid: End of File";
+        return NULL;
     case TOK_FN:
         return "fn";
     case TOK_NAME:
