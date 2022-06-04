@@ -5,6 +5,10 @@
 #include <stdio.h>
 #include "token.h"
 
+/**
+ * @brief The lexer takes a stream of characters as
+ * input and converts them into a stream of @ref Token.
+ */
 typedef struct
 {
     FILE *input_file;

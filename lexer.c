@@ -106,6 +106,7 @@ static inline Token lexer_lex_word(Lexer *lexer)
 
     const size_t l = lexer->p - start;
 
+    // Check if the name is a reserved keyword
     const TokenId keyword = find_keyword(start, l);
     if (keyword == TOK_EOF)
     {
@@ -381,11 +382,11 @@ Token lexer_next(Lexer *lexer)
 {
     for (;;)
     {
-        if (*lexer->p == '\0')
+        if (*lexer->p == '\0') // end of line
         {
             lexer_fetch_line(lexer);
 
-            if (feof(lexer->input_file))
+            if (feof(lexer->input_file)) // end of input file
             {
                 return (Token){0};
             }
@@ -401,7 +402,7 @@ Token lexer_next(Lexer *lexer)
         }
         else if (is_whitespace(*lexer->p))
         {
-            ++lexer->p;
+            ++lexer->p; // ignore whitespace
         }
         else
         {
