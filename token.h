@@ -80,7 +80,7 @@ typedef struct
 
 /**
  * @brief Returns the printable name of a @ref TokenId. This name
- * is used for error messages, warning messages and general debugging.
+ *        is used for error messages, warning messages and general debugging.
  */
 const char *token_name(const TokenId id);
 
