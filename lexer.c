@@ -78,16 +78,31 @@ static void lexer_fatal(const char *error_msg)
 }
 
 /**
- * @brief Load next line from input file into next_line buffer.
+ * @brief Load next line from input file into line_buffer.
  */
 static void lexer_fetch_line(Lexer *lexer)
 {
-    if (fgets(lexer->next_line, 255, lexer->input_file) == NULL) // TODO: increase size dynamically
+    size_t line_buffer_pos = 0;
+    for (int next_char;;)
     {
-        lexer->next_line = "\0";
+        next_char = fgetc(lexer->input_file);
+
+        if (next_char == EOF || next_char == '\n')
+        {
+            break;
+        }
+
+        if (line_buffer_pos >= lexer->line_buffer_size)
+        {
+            lexer->line_buffer_size *= 2;
+            lexer->line_buffer = realloc(lexer->line_buffer, lexer->line_buffer_size);
+        }
+
+        lexer->line_buffer[line_buffer_pos++] = (char)next_char;
     }
 
-    lexer->p = lexer->next_line;
+    lexer->line_buffer[line_buffer_pos] = '\0';
+    lexer->p = lexer->line_buffer;
 }
 
 /**
@@ -354,8 +369,6 @@ static inline Token lexer_lex_symbol(Lexer *lexer)
         break;
     }
 
-    ++lexer->p;
-
     return next;
 }
 
@@ -367,11 +380,13 @@ static inline Token lexer_lex_symbol(Lexer *lexer)
 
 Lexer lexer_create(FILE *input_file)
 {
-    char *line_mem = malloc(255);
+    const size_t initial_size = 32;
+    char *line_buffer = malloc(initial_size);
 
     Lexer lexer = {
         .input_file = input_file,
-        .next_line = line_mem,
+        .line_buffer = line_buffer,
+        .line_buffer_size = initial_size,
         .p = "\0",
     };
 
@@ -402,7 +417,7 @@ Token lexer_next(Lexer *lexer)
         }
         else if (is_whitespace(*lexer->p))
         {
-            ++lexer->p; // ignore whitespace
+            ++lexer->p; // skip whitespace
         }
         else
         {

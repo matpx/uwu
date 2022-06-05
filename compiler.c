@@ -18,7 +18,8 @@ int main(int argc, char *argv[])
     {
         printf("%d %s\n", next.id, token_name(next.id));
 
-        if(next.text) {
+        if (next.text)
+        {
             free(next.text);
         }
     }

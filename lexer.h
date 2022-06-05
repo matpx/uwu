@@ -12,8 +12,9 @@
 typedef struct
 {
     FILE *input_file;
-    char *next_line; // line buffer
-    char *p;         // current position in next_line
+    char *line_buffer;       // current line
+    size_t line_buffer_size; // size of line_buffer
+    char *p;                 // current position in line_buffer
 } Lexer;
 
 /**
