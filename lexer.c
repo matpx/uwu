@@ -79,15 +79,22 @@ static void lexer_fatal(const char *error_msg)
 
 /**
  * @brief Load next line from input file into line_buffer.
+ *
+ * @return returns false if EOF has been reached, true otherwise
  */
-static void lexer_fetch_line(Lexer *lexer)
+static bool lexer_fetch_line(Lexer *lexer)
 {
     size_t line_buffer_pos = 0;
     for (int next_char;;)
     {
         next_char = fgetc(lexer->input_file);
 
-        if (next_char == EOF || next_char == '\n')
+        if (next_char == EOF)
+        {
+            return false;
+        }
+
+        if (next_char == '\n')
         {
             break;
         }
@@ -103,6 +110,8 @@ static void lexer_fetch_line(Lexer *lexer)
 
     lexer->line_buffer[line_buffer_pos] = '\0';
     lexer->p = lexer->line_buffer;
+
+    return true;
 }
 
 /**
@@ -399,9 +408,7 @@ Token lexer_next(Lexer *lexer)
     {
         while (*lexer->p == '\0') // end of line
         {
-            lexer_fetch_line(lexer);
-
-            if (feof(lexer->input_file)) // end of input file
+            if (!lexer_fetch_line(lexer)) // fetch and check for EOF
             {
                 return (Token){0};
             }
