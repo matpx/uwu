@@ -17,6 +17,10 @@ int main(int argc, char *argv[])
     while ((next = lexer_next(&lexer)).id != TOK_EOF)
     {
         printf("%d %s\n", next.id, token_name(next.id));
+
+        if(next.text) {
+            free(next.text);
+        }
     }
 
     return 0;
