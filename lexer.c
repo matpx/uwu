@@ -397,7 +397,7 @@ Token lexer_next(Lexer *lexer)
 {
     for (;;)
     {
-        if (*lexer->p == '\0') // end of line
+        while (*lexer->p == '\0') // end of line
         {
             lexer_fetch_line(lexer);
 
