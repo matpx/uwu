@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
     {
         fprintf(stderr, "Failed to open input file");
 
-        exit(-1);
+        exit(1);
     }
 
     Lexer lexer = lexer_create(input_file);

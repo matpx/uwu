@@ -74,7 +74,7 @@ static void lexer_fatal(const char *error_msg)
 {
     fprintf(stderr, "Lexer Fatal: %s", error_msg);
 
-    exit(-1);
+    exit(1);
 }
 
 /**
