@@ -78,7 +78,7 @@ static void lexer_fatal(const char *error_msg)
 }
 
 /**
- * @brief Load next line from input file into line_buffer.
+ * @brief Load next line from input file into null terminated line_buffer.
  *
  * @return returns false if EOF has been reached, true otherwise
  */
@@ -94,11 +94,12 @@ static bool lexer_fetch_line(Lexer *lexer)
             return false;
         }
 
-        if (next_char == '\n')
+        if (next_char == '\n') // read only one line
         {
             break;
         }
 
+        // grow the line_buffer if necessary
         if (line_buffer_pos >= lexer->line_buffer_size)
         {
             lexer->line_buffer_size *= 2;
